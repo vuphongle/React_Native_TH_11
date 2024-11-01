@@ -1,21 +1,35 @@
-import React from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+// screens/HomeScreen.js
+
+import React, { useState } from "react";
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export default function HomeScreen({ navigation }) {
+  const [name, setName] = useState('');
+
+  const handleGetStarted = () => {
+    if (name.trim() === "") {
+      Alert.alert("Lỗi", "Vui lòng nhập tên của bạn!");
+      return;
+    }
+    navigation.navigate('List', { userName: name });
+  };
+
   return (
     <View style={styles.container}>
-      <Image source={require("../img/Image 95.png")} style={styles.mainImage} />
+      <Image source={require("../assets/img/Image95.png")} style={styles.mainImage} />
       <Text style={styles.title}>MANAGE YOUR TASK</Text>
       <View style={styles.inputContainer}>
-        <Image source={require("../img/Frame.png")} style={styles.icon} />
+        <Image source={require("../assets/img/Frame.png")} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Enter your name"
           placeholderTextColor="#999"
+          value={name}
+          onChangeText={setName}
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress = {() => navigation.navigate('List')}>
+      <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
     </View>
@@ -28,18 +42,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-around",
-    paddingHorizontal: 20, // Thêm padding nếu cần
+    paddingHorizontal: 20,
   },
   mainImage: {
     width: 300,
     height: 300,
-    resizeMode: "cover", // Giúp ảnh không bị méo khi thay đổi kích thước
+    resizeMode: "cover",
   },
   title: {
     fontSize: 30,
     fontWeight: "bold",
     marginTop: 20,
-    textAlign: "center", // Căn giữa văn bản
+    textAlign: "center",
   },
   inputContainer: {
     flexDirection: "row",
@@ -47,10 +61,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     paddingHorizontal: 10,
-    paddingVertical: 5, // Thêm padding dọc để tăng kích thước container
+    paddingVertical: 5,
     marginTop: 20,
-    borderRadius: 5, // Thêm bo góc nếu muốn
-    width: "100%", // Đảm bảo inputContainer chiếm toàn bộ chiều ngang có sẵn
+    borderRadius: 5,
+    width: "100%",
   },
   icon: {
     width: 20,

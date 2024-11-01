@@ -1,6 +1,6 @@
-// src/redux/sagas/taskSagas.js
+// sagas/taskSaga.js
 
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import axios from 'axios';
 import {
   FETCH_TASKS_REQUEST,
@@ -17,7 +17,6 @@ import {
   updateTaskFailure,
 } from '../actions/taskActions';
 
-// API URL
 const API_URL = 'https://6707f41d8e86a8d9e42d968b.mockapi.io/data';
 
 // Fetch Tasks
@@ -33,7 +32,7 @@ function* fetchTasks() {
 // Add Task
 function* addTask(action) {
   try {
-    const response = yield call(axios.post, API_URL, { title: action.payload.title });
+    const response = yield call(axios.post, API_URL, { title: action.payload });
     yield put(addTaskSuccess(response.data));
   } catch (error) {
     yield put(addTaskFailure(error.message));
@@ -61,9 +60,11 @@ function* updateTask(action) {
   }
 }
 
-export default function* taskSagas() {
-  yield takeLatest(FETCH_TASKS_REQUEST, fetchTasks);
-  yield takeLatest(ADD_TASK_REQUEST, addTask);
-  yield takeLatest(DELETE_TASK_REQUEST, deleteTask);
-  yield takeLatest(UPDATE_TASK_REQUEST, updateTask);
+function* taskSaga() {
+  yield takeEvery(FETCH_TASKS_REQUEST, fetchTasks);
+  yield takeEvery(ADD_TASK_REQUEST, addTask);
+  yield takeEvery(DELETE_TASK_REQUEST, deleteTask);
+  yield takeEvery(UPDATE_TASK_REQUEST, updateTask);
 }
+
+export default taskSaga;

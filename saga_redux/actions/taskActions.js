@@ -1,5 +1,6 @@
-// src/redux/actions/taskActions.js
+// actions/taskActions.js
 
+// Action Types
 export const FETCH_TASKS_REQUEST = 'FETCH_TASKS_REQUEST';
 export const FETCH_TASKS_SUCCESS = 'FETCH_TASKS_SUCCESS';
 export const FETCH_TASKS_FAILURE = 'FETCH_TASKS_FAILURE';
@@ -17,7 +18,6 @@ export const UPDATE_TASK_SUCCESS = 'UPDATE_TASK_SUCCESS';
 export const UPDATE_TASK_FAILURE = 'UPDATE_TASK_FAILURE';
 
 // Action Creators
-
 export const fetchTasksRequest = () => ({
   type: FETCH_TASKS_REQUEST,
 });

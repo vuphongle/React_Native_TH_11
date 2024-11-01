@@ -1,4 +1,6 @@
-import React, { useCallback, useState } from "react";
+// screens/ListScreen.js
+
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,40 +9,41 @@ import {
   SafeAreaView,
   Alert,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons"; // Sử dụng các icon từ thư viện
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import axios from "axios";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchTasksRequest,
+  deleteTaskRequest,
+  updateTaskRequest,
+} from '../actions/taskActions';
 
 export default function ListScreen() {
   const navigation = useNavigation(); 
-  const [tasks, setTasks] = useState([]);
-  
-  // Trạng thái cho chỉnh sửa
+  const route = useRoute();
+  const dispatch = useDispatch();
+  const { tasks, loading, error } = useSelector(state => state.tasks);
+
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
 
-  const API_URL = "https://6707f41d8e86a8d9e42d968b.mockapi.io/data";
+  const userName = route.params?.userName || "User";
 
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get(API_URL);
-      setTasks(response.data);
-    } catch (error) {
-      Alert.alert("Error", "Something went wrong!");
-      console.error(error);
-    }
-  };
+  useEffect(() => {
+    dispatch(fetchTasksRequest());
+  }, [dispatch]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchTasks();
-    }, [])
+      dispatch(fetchTasksRequest());
+    }, [dispatch])
   );
 
   // Hàm xóa task
-  const deleteTask = (id) => {
+  const handleDeleteTask = (id) => {
     Alert.alert(
       "Xác nhận xóa",
       "Bạn có chắc chắn muốn xóa task này?",
@@ -49,15 +52,7 @@ export default function ListScreen() {
         {
           text: "Xóa",
           style: "destructive",
-          onPress: async () => {
-            try {
-              await axios.delete(`${API_URL}/${id}`);
-              setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-            } catch (error) {
-              Alert.alert("Lỗi", "Xảy ra lỗi khi xóa!");
-              console.error(error);
-            }
-          }
+          onPress: () => dispatch(deleteTaskRequest(id)),
         },
       ],
       { cancelable: true }
@@ -65,40 +60,29 @@ export default function ListScreen() {
   };
 
   // Hàm bắt đầu chỉnh sửa task
-  const startEditing = (task) => {
+  const handleStartEditing = (task) => {
     setEditingTaskId(task.id);
     setEditedTitle(task.title);
   };
 
   // Hàm hủy chỉnh sửa
-  const cancelEditing = () => {
+  const handleCancelEditing = () => {
     setEditingTaskId(null);
     setEditedTitle("");
   };
 
   // Hàm lưu chỉnh sửa task
-  const saveEditing = async (task) => {
+  const handleSaveEditing = (task) => {
     if (editedTitle.trim() === "") {
       Alert.alert("Lỗi", "Tên công việc không được để trống!");
       return;
     }
-
-    try {
-      await axios.put(`${API_URL}/${task.id}`, { title: editedTitle });
-      setTasks((prevTasks) =>
-        prevTasks.map((t) =>
-          t.id === task.id ? { ...t, title: editedTitle } : t
-        )
-      );
-      setEditingTaskId(null);
-      setEditedTitle("");
-    } catch (error) {
-      Alert.alert("Lỗi", "Cập nhật công việc thất bại!");
-      console.error(error);
-    }
+    dispatch(updateTaskRequest({ id: task.id, title: editedTitle }));
+    setEditingTaskId(null);
+    setEditedTitle("");
   };
 
-  const addTask = () => {
+  const handleAddTask = () => {
     navigation.navigate("Add");
   };
 
@@ -111,7 +95,7 @@ export default function ListScreen() {
             style={styles.input}
             value={editedTitle}
             onChangeText={setEditedTitle}
-            onSubmitEditing={() => saveEditing(item)}
+            onSubmitEditing={() => handleSaveEditing(item)}
             returnKeyType="done"
           />
         ) : (
@@ -122,13 +106,13 @@ export default function ListScreen() {
             <>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => saveEditing(item)}
+                onPress={() => handleSaveEditing(item)}
               >
                 <Ionicons name="save-outline" size={24} color="#4CAF50" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={cancelEditing}
+                onPress={handleCancelEditing}
               >
                 <Ionicons name="close-outline" size={24} color="#F44336" />
               </TouchableOpacity>
@@ -137,13 +121,13 @@ export default function ListScreen() {
             <>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => startEditing(item)}
+                onPress={() => handleStartEditing(item)}
               >
                 <MaterialIcons name="edit" size={24} color="#4CAF50" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => deleteTask(item.id)}
+                onPress={() => handleDeleteTask(item.id)}
               >
                 <Ionicons name="trash-outline" size={24} color="#F44336" />
               </TouchableOpacity>
@@ -154,9 +138,21 @@ export default function ListScreen() {
     );
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    Alert.alert("Lỗi", error);
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Danh Sách Công Việc</Text>
+      <Text style={styles.title}>Danh Sách Công Việc của {userName}</Text>
       <FlatList
         data={tasks}
         renderItem={renderItem}
@@ -164,7 +160,7 @@ export default function ListScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={<Text style={styles.emptyText}>Không có công việc nào.</Text>}
       />
-      <TouchableOpacity style={styles.addButton} onPress={addTask}>
+      <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
@@ -179,8 +175,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     position: "relative",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "700",
     color: "#333",
     marginBottom: 20,
