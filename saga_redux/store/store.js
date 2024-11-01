@@ -5,6 +5,8 @@ import createSagaMiddleware from 'redux-saga';
 import rootReducer from '../reducers';
 import rootSaga from '../sagas';
 
+console.log('rootReducer:', rootReducer); // Thêm dòng này để debug
+
 const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore(

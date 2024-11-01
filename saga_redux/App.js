@@ -1,40 +1,14 @@
-import React from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+// App.js
 
-import HomeScreen from "./screens/HomeScreen";
-import ListScreen from "./screens/ListScreen";
-import AddScreen from "./screens/AddScreen";
-const Stack = createStackNavigator();
+import React from "react";
+import { Provider } from 'react-redux';
+import store from './store/store';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="List"
-          component={ListScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Add"
-          component={AddScreen}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <AppNavigator />
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

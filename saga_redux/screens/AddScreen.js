@@ -12,6 +12,7 @@ export default function AddScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [job, setJob] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false); // Thêm state mới
 
   const { loading, error } = useSelector(state => state.tasks);
 
@@ -22,18 +23,21 @@ export default function AddScreen() {
     }
     dispatch(addTaskRequest(job));
     setJob("");
+    setIsSubmitted(true); // Đánh dấu đã nhấn Finish
   };
 
   // Theo dõi khi addTask thành công hoặc lỗi
   useEffect(() => {
-    if (!loading && !error) {
-      Alert.alert("Thành công", "Thêm công việc thành công!", [
-        { text: "OK", onPress: () => navigation.navigate("List") },
-      ]);
-    } else if (error) {
-      Alert.alert("Lỗi", "Có lỗi xảy ra khi thêm công việc!");
+    if (isSubmitted) {
+      if (!loading && !error) {
+        Alert.alert("Thành công", "Thêm công việc thành công!", [
+          { text: "OK", onPress: () => navigation.navigate("List") },
+        ]);
+      } else if (error) {
+        Alert.alert("Lỗi", "Có lỗi xảy ra khi thêm công việc!");
+      }
     }
-  }, [loading, error]);
+  }, [loading, error, isSubmitted, navigation]);
 
   return (
     <View style={styles.container}>

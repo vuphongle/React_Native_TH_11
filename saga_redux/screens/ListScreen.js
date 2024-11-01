@@ -82,6 +82,7 @@ export default function ListScreen() {
     setEditedTitle("");
   };
 
+  // Hàm thêm task mới: Điều hướng đến màn hình Add
   const handleAddTask = () => {
     navigation.navigate("Add");
   };
@@ -160,6 +161,7 @@ export default function ListScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={<Text style={styles.emptyText}>Không có công việc nào.</Text>}
       />
+      {/* Nút thêm công việc */}
       <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
